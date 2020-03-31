@@ -18,6 +18,7 @@
                     :router="true" 侧边栏开启路由模式
                 -->
                 <el-menu background-color="#333744" text-color="#fff" :router="true"
+                :default-active="activePath"
                 unique-opened :collapse="isCollapse" :collapse-transition="false"
                 active-text-color="#ffd04b">
                 <!-- 一级菜单 -->
@@ -29,7 +30,7 @@
                             <span>{{item.authName}}</span>
                         </template>
                         <!-- 二级菜单 -->
-                        <el-menu-item :index="subItem.id + ''" v-for="subItem in item.children" :key="subItem.id">
+                        <el-menu-item :index="'/' + subItem.path" v-for="subItem in item.children" :key="subItem.id" @click="saveNavState('/' + subItem.path)">
                             <template slot="title">
                                 <i class="el-icon-menu"></i>
                                 <span>{{subItem.authName}}</span>
@@ -60,10 +61,12 @@ export default {
                 '145': 'iconfont icon-baobiao'
             },
             isCollapse: false,  // 默认不折叠
+            activePath: '', // 被激活的动态链接地址
         };
     },
     created(){
         this.getMentList();
+        this.activePath = window.sessionStorage.getItem('activePath')
     },
     methods: {
         logout() {
@@ -75,11 +78,16 @@ export default {
             const {data:res} = await this.$http.get('menus');
             if(res.meta.status != 200) return this.$message.err(res.meta.msg)
             this.menuList = res.data;
-            console.log(res);
+            // console.log(res);
         },
         // 菜单折叠与展开时间
         toggleCollapse(){
             this.isCollapse = !this.isCollapse;
+        },
+        saveNavState(activePath){
+            // 保存链接的激活状态
+            window.sessionStorage.setItem('activePath', activePath)
+            this.activePath = activePath
         }
 
     }
